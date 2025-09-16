@@ -48,8 +48,13 @@ const products: Product[] = [
   },
 ];
 
-export default function ProductDetail(props: { params: { id: string } }) {
-  const { params } = props;
+type ProductDetailProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default function ProductDetail({ params }: ProductDetailProps) {
   const product = products.find((p) => p.id === Number(params.id));
 
   if (!product) {
