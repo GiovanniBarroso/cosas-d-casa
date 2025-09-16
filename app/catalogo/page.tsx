@@ -1,44 +1,6 @@
 import Card from "../components/ui/Card";
 import SectionTitle from "../components/ui/SectionTitle";
-
-type Product = {
-  id: number;
-  name: string;
-  price: string;
-  image: string;
-  category: string;
-};
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Mesa de madera",
-    price: "120€",
-    image: "https://via.placeholder.com/300x200.png?text=Mesa",
-    category: "Muebles",
-  },
-  {
-    id: 2,
-    name: "Silla de comedor",
-    price: "45€",
-    image: "https://via.placeholder.com/300x200.png?text=Silla",
-    category: "Muebles",
-  },
-  {
-    id: 3,
-    name: "Jarrón decorativo",
-    price: "25€",
-    image: "https://via.placeholder.com/300x200.png?text=Jarron",
-    category: "Decoración",
-  },
-  {
-    id: 4,
-    name: "Lámpara de pie",
-    price: "60€",
-    image: "https://via.placeholder.com/300x200.png?text=Lampara",
-    category: "Decoración",
-  },
-];
+import { products } from "../data/products";
 
 const categories = [...new Set(products.map((p) => p.category))];
 
