@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import Link from "next/link";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -22,13 +23,29 @@ export default function Button({
     whatsapp: "bg-green-500 hover:bg-green-600 text-white",
   };
 
+  // Si hay href y es interno → Link
+  if (href?.startsWith("/")) {
+    return (
+      <Link href={href} className={clsx(base, variants[variant])}>
+        {children}
+      </Link>
+    );
+  }
+
+  // Si hay href y es externo → <a>
   if (href) {
     return (
-      <a href={href} className={clsx(base, variants[variant])}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={clsx(base, variants[variant])}
+      >
         {children}
       </a>
     );
   }
 
+  // Default → <button>
   return <button className={clsx(base, variants[variant])}>{children}</button>;
 }

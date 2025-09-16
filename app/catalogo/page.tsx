@@ -58,6 +58,7 @@ export default function CatalogoPage() {
               .map((p) => (
                 <Card
                   key={p.id}
+                  id={p.id}
                   title={p.name}
                   price={p.price}
                   category={p.category}

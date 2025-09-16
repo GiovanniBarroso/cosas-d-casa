@@ -18,6 +18,7 @@ export default function Navbar() {
         <button
           className="sm:hidden text-gray-600 focus:outline-none"
           onClick={() => setOpen(!open)}
+          aria-label="Abrir menú"
         >
           ☰
         </button>

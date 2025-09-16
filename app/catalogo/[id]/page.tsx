@@ -48,7 +48,8 @@ const products: Product[] = [
   },
 ];
 
-export default function ProductDetail({ params }: { params: { id: string } }) {
+export default function ProductDetail(props: { params: { id: string } }) {
+  const { params } = props;
   const product = products.find((p) => p.id === Number(params.id));
 
   if (!product) {

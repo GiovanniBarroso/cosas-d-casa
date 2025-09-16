@@ -10,6 +10,8 @@ export default function Home() {
         Catálogo local de productos únicos para tu hogar. Encuentra lo que
         necesitas de manera rápida y sencilla.
       </p>
+
+      {/* Link externo → se mantiene <a> */}
       <a
         href="https://wa.me/34XXXXXXXXX"
         target="_blank"
@@ -18,6 +20,8 @@ export default function Home() {
       >
         Escríbenos por WhatsApp
       </a>
+
+      {/* Link interno → <Link /> */}
       <Link
         href="/catalogo"
         className="mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition"
