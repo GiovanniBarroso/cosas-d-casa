@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import Button from "@/app/components/ui/Button";
 import Image from "next/image";
+import Button from "@/app/components/ui/Button";
 
 type Product = {
   id: number;
@@ -48,15 +48,20 @@ const products: Product[] = [
   },
 ];
 
-// 🔑 Next pre-generará todas estas rutas estáticas
+// Pre-generamos /catalogo/1, /catalogo/2, ...
 export function generateStaticParams() {
-  return products.map((product) => ({
-    id: product.id.toString(),
-  }));
+  return products.map((p) => ({ id: String(p.id) }));
 }
 
-export default function ProductDetail({ params }: { params: { id: string } }) {
-  const product = products.find((p) => p.id === Number(params.id));
+// ✅ En Next 15, params se tipa como Promise en build.
+//    Hacemos la página async y esperamos params.
+export default async function ProductDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const product = products.find((p) => p.id === Number(id));
 
   if (!product) {
     return notFound();
@@ -85,7 +90,9 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
 
           <Button
             variant="whatsapp"
-            href={`https://wa.me/34XXXXXXXXX?text=Hola! Estoy interesado en el producto: ${product.name}`}
+            href={`https://wa.me/34XXXXXXXXX?text=Hola!%20Estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(
+              product.name
+            )}`}
           >
             Comprar por WhatsApp
           </Button>
