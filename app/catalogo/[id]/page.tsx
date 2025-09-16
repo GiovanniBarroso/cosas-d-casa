@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Button from "@/app/components/ui/Button";
+import Image from "next/image";
 
 type Product = {
   id: number;
@@ -57,9 +58,11 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
   return (
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
+          width={600}
+          height={400}
           className="w-full h-64 object-cover"
         />
 

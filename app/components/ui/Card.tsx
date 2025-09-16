@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Button from "./Button";
+import Image from "next/image";
 
 type CardProps = {
   id: number;
@@ -13,7 +14,13 @@ export default function Card({ id, title, price, category, image }: CardProps) {
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col">
       <Link href={`/catalogo/${id}`}>
-        <img src={image} alt={title} className="w-full h-40 object-cover" />
+        <Image
+          src={image}
+          alt={title}
+          width={300}
+          height={200}
+          className="w-full h-40 object-cover"
+        />
       </Link>
       <div className="p-4 flex flex-col flex-grow">
         <Link href={`/catalogo/${id}`}>
