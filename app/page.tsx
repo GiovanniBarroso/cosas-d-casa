@@ -5,8 +5,8 @@ export default function Home() {
         Cosas D Casa 🏡
       </h1>
       <p className="text-lg text-gray-600 mb-8 text-center max-w-xl">
-        Catálogo local de productos únicos para tu hogar.  
-        Encuentra lo que necesitas de manera rápida y sencilla.
+        Catálogo local de productos únicos para tu hogar. Encuentra lo que
+        necesitas de manera rápida y sencilla.
       </p>
       <a
         href="https://wa.me/34XXXXXXXXX"
@@ -16,6 +16,12 @@ export default function Home() {
       >
         Escríbenos por WhatsApp
       </a>
+      <a
+        href="/catalogo"
+        className="mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition"
+      >
+        Ver catálogo
+      </a>
     </main>
-  )
+  );
 }
