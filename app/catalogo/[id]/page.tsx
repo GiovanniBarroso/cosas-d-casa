@@ -48,13 +48,14 @@ const products: Product[] = [
   },
 ];
 
-type ProductDetailProps = {
-  params: {
-    id: string;
-  };
-};
+// 🔑 Next pre-generará todas estas rutas estáticas
+export function generateStaticParams() {
+  return products.map((product) => ({
+    id: product.id.toString(),
+  }));
+}
 
-export default function ProductDetail({ params }: ProductDetailProps) {
+export default function ProductDetail({ params }: { params: { id: string } }) {
   const product = products.find((p) => p.id === Number(params.id));
 
   if (!product) {
