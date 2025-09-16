@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-white to-gray-100 p-6">
@@ -16,12 +18,12 @@ export default function Home() {
       >
         Escríbenos por WhatsApp
       </a>
-      <a
+      <Link
         href="/catalogo"
         className="mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition"
       >
         Ver catálogo
-      </a>
+      </Link>
     </main>
   );
 }
