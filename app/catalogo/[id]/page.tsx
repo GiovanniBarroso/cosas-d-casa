@@ -9,13 +9,11 @@ import { formatPrice } from "@/utils/formatPrice";
 export const revalidate = 60;
 export const dynamicParams = true;
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<{ id: string }[]> {
   const { data, error } = await supabase.from("products").select("id");
   if (error || !data) return [];
   return data.map((p) => ({ id: String(p.id) }));
 }
-
-type Props = { params: { id: string } };
 
 type ProductDetail = {
   id: string;
@@ -27,8 +25,12 @@ type ProductDetail = {
 };
 
 // --- SEO por producto ---
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = params;
+// En Next 15, params puede ser Promise, así que lo tipamos y hacemos await
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> }
+): Promise<Metadata> {
+  const { id } = await params;
+
   const { data } = await supabase
     .from("products")
     .select("name, description, image")
@@ -56,8 +58,10 @@ const MAPS_URL =
   process.env.NEXT_PUBLIC_MAPS_URL ??
   "https://maps.google.com/?q=Cosas%20D%20Casa";
 
-export default async function ProductDetailPage({ params }: Props) {
-  const { id } = params;
+export default async function ProductDetailPage(
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
 
   const { data: product, error } = await supabase
     .from("products")
@@ -71,8 +75,8 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const price = formatPrice(product.price_cents);
 
-  // ---- JSON-LD Product (para Google) ----
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tu-dominio.com";
+  // JSON-LD
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cosas-d-casa.vercel.app";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -90,7 +94,7 @@ export default async function ProductDetailPage({ params }: Props) {
     },
   };
 
-  // Mensaje WA prellenado
+  // WhatsApp prellenado
   const waText = encodeURIComponent(
     `Hola, me interesa el producto "${product.name}" (${price}). ¿Podemos hablar?`
   );
@@ -98,7 +102,6 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 p-6">
-      {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -133,7 +136,6 @@ export default async function ProductDetailPage({ params }: Props) {
             {product.description || "Sin descripción disponible."}
           </p>
 
-          {/* CTAs */}
           <div className="flex flex-wrap gap-3 mb-8">
             <a
               href={waLink}
