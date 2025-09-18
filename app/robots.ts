@@ -22,6 +22,5 @@ export default function robots(): MetadataRoute.Robots {
     return {
         rules,
         sitemap: isProd ? `${site}/sitemap.xml` : undefined,
-        host: isProd ? site : undefined,
     };
 }
