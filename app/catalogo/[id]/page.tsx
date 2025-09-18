@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { formatPrice } from "@/utils/formatPrice";
+import Button from "@/app/components/ui/Button";
+import { Phone, MapPin, MessageCircle } from "lucide-react";
 
 export const revalidate = 60;
 export const dynamicParams = true;
@@ -24,13 +26,11 @@ type ProductDetail = {
   category: { name: string } | null;
 };
 
-// --- SEO por producto ---
-// En Next 15, params puede ser Promise, así que lo tipamos y hacemos await
+// --- SEO ---
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params;
-
   const { data } = await supabase
     .from("products")
     .select("name, description, image")
@@ -51,7 +51,7 @@ export async function generateMetadata(
   };
 }
 
-// --- Config CTA (rellena tus ENV) ---
+// --- Config CTA ---
 const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "34600000000";
 const TEL_LINK = process.env.NEXT_PUBLIC_PHONE_TEL ?? "tel:+34600000000";
 const MAPS_URL =
@@ -62,16 +62,13 @@ export default async function ProductDetailPage(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-
   const { data: product, error } = await supabase
     .from("products")
     .select("id, name, price_cents, image, description, category:categories(name)")
     .eq("id", id)
     .single<ProductDetail>();
 
-  if (error || !product) {
-    notFound();
-  }
+  if (error || !product) notFound();
 
   const price = formatPrice(product.price_cents);
 
@@ -101,69 +98,75 @@ export default async function ProductDetailPage(
   const waLink = `https://wa.me/${WA_NUMBER}?text=${waText}`;
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <main className="min-h-screen bg-gray-50 px-4 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            width={800}
-            height={600}
-            sizes="(min-width: 1024px) 800px, 100vw"
-            className="w-full h-96 object-cover"
-            priority
-          />
-        ) : (
-          <div className="w-full h-96 bg-gray-200 flex items-center justify-center text-gray-500">
-            Sin imagen
-          </div>
-        )}
+      <div className="mx-auto grid max-w-5xl gap-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:grid-cols-2">
+        {/* Imagen */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover transition-transform duration-300 hover:scale-105"
+              priority
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-gray-500">
+              <span className="sr-only">Sin imagen disponible</span>
+              Sin imagen
+            </div>
+          )}
+        </div>
 
-        <div className="p-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{product.name}</h1>
-          <p className="text-green-600 font-bold text-xl mb-4">{price}</p>
-
-          <p className="text-sm text-gray-500 mb-6">
+        {/* Detalles */}
+        <div className="flex flex-col">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">{product.name}</h1>
+          <p className="mb-4 text-xl font-semibold text-green-600">{price}</p>
+          <p className="mb-6 text-sm text-gray-500">
             {product.category?.name ?? "Sin categoría"}
           </p>
 
-          <p className="text-gray-700 leading-relaxed mb-6">
+          <p className="mb-6 text-gray-700 leading-relaxed">
             {product.description || "Sin descripción disponible."}
           </p>
 
-          <div className="flex flex-wrap gap-3 mb-8">
-            <a
+          {/* CTAs */}
+          <div className="mb-8 flex flex-wrap gap-3">
+            <Button
               href={waLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              variant="whatsapp"
+              aria-label="Contactar por WhatsApp"
+              iconLeft={<MessageCircle size={18} />}
             >
               WhatsApp
-            </a>
-            <a
+            </Button>
+            <Button
               href={TEL_LINK}
-              className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              variant="primary"
+              aria-label="Llamar por teléfono"
+              iconLeft={<Phone size={18} />}
             >
               Llamar
-            </a>
-            <a
+            </Button>
+            <Button
               href={MAPS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition"
+              variant="secondary"
+              aria-label="Cómo llegar"
+              iconLeft={<MapPin size={18} />}
             >
               Cómo llegar
-            </a>
+            </Button>
           </div>
 
           <Link
             href="/catalogo"
-            className="inline-block px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition"
+            className="text-sm font-medium text-blue-600 hover:underline"
           >
             ← Volver al catálogo
           </Link>

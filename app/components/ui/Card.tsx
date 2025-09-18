@@ -12,37 +12,50 @@ type CardProps = {
 
 export default function Card({ id, title, price, category, image }: CardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col">
-      <Link href={`/catalogo/${id}`}>
+    <article className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg">
+      {/* Imagen */}
+      <Link
+        href={`/catalogo/${id}`}
+        aria-label={`Ver detalle de ${title}`}
+        className="relative block h-40 w-full overflow-hidden"
+      >
         {image ? (
           <Image
             src={image}
             alt={title}
-            width={300}
-            height={200}
+            fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="w-full h-40 object-cover"
+            className="object-cover transition-transform duration-300 hover:scale-105"
+            loading="lazy"
           />
         ) : (
-          <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+          <div className="flex h-full w-full items-center justify-center bg-gray-200 text-gray-500">
             Sin imagen
           </div>
         )}
       </Link>
 
-      <div className="p-4 flex flex-col flex-grow">
-        <Link href={`/catalogo/${id}`}>
-          <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
+      {/* Contenido */}
+      <div className="flex flex-grow flex-col p-4">
+        <Link
+          href={`/catalogo/${id}`}
+          className="group mb-1 inline-block"
+        >
+          <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+            {title}
+          </h3>
         </Link>
-        <p className="text-green-600 font-bold">{price}</p>
-        <p className="text-sm text-gray-500 mb-4">{category}</p>
 
+        <p className="text-green-600 font-bold">{price}</p>
+        <p className="mb-4 text-sm text-gray-500">{category}</p>
+
+        {/* CTA */}
         <div className="mt-auto">
           <Button variant="secondary" href={`/catalogo/${id}`}>
             Ver detalle
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
