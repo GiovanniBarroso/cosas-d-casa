@@ -3,24 +3,31 @@ import Image from "next/image";
 import Button from "./Button";
 
 type CardProps = {
-  id: number;
+  id: string;
   title: string;
   price: string;
   category: string;
-  image: string;
+  image?: string | null;
 };
 
 export default function Card({ id, title, price, category, image }: CardProps) {
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col">
       <Link href={`/catalogo/${id}`}>
-        <Image
-          src={image}
-          alt={title}
-          width={300}
-          height={200}
-          className="w-full h-40 object-cover"
-        />
+        {image ? (
+          <Image
+            src={image}
+            alt={title}
+            width={300}
+            height={200}
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="w-full h-40 object-cover"
+          />
+        ) : (
+          <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+            Sin imagen
+          </div>
+        )}
       </Link>
 
       <div className="p-4 flex flex-col flex-grow">

@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; // Detecta el hostname de tu proyecto Supabase desde la env
+const supabaseHostname = supabaseUrl ? new URL(supabaseUrl).hostname : undefined;
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      ...(supabaseHostname
+        ? [{ protocol: "https", hostname: supabaseHostname, pathname: "/storage/v1/object/public/**" } as const]
+        : []),
       { protocol: "https", hostname: "via.placeholder.com" },
-      // si luego usas placehold.co u otros, añádelos aquí
-      // { protocol: "https", hostname: "placehold.co" },
     ],
   },
 };

@@ -1,68 +1,170 @@
+// app/catalogo/[id]/page.tsx
+import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Button from "@/app/components/ui/Button";
-import { products } from "@/app/data/products";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { formatPrice } from "@/utils/formatPrice";
 
-export function generateStaticParams() {
-  return products.map((p) => ({ id: String(p.id) }));
+export const revalidate = 60;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const { data, error } = await supabase.from("products").select("id");
+  if (error || !data) return [];
+  return data.map((p) => ({ id: String(p.id) }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const p = products.find((x) => x.id === Number(id));
-  if (!p) return { title: "Producto no encontrado · Cosas D Casa" };
+type Props = { params: { id: string } };
+
+type ProductDetail = {
+  id: string;
+  name: string;
+  price_cents: number;
+  image: string | null;
+  description: string | null;
+  category: { name: string } | null;
+};
+
+// --- SEO por producto ---
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = params;
+  const { data } = await supabase
+    .from("products")
+    .select("name, description, image")
+    .eq("id", id)
+    .maybeSingle();
+
+  const title = data?.name ? `${data.name} | Cosas D Casa` : "Producto | Cosas D Casa";
+  const description =
+    data?.description?.slice(0, 155) ??
+    "Descubre nuestros productos artesanales en Cosas D Casa.";
+  const images = data?.image ? [data.image] : [];
+
   return {
-    title: `${p.name} · Cosas D Casa`,
-    description: p.description,
-    openGraph: {
-      title: `${p.name} · Cosas D Casa`,
-      description: p.description,
-      images: [p.image],
-    },
+    title,
+    description,
+    openGraph: { title, description, images },
+    twitter: { card: "summary_large_image", title, description, images },
   };
 }
 
-// En Next 15, params es Promise en build: página async y await
-export default async function ProductDetail({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const product = products.find((p) => p.id === Number(id));
-  if (!product) return notFound();
+// --- Config CTA (rellena tus ENV) ---
+const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "34600000000";
+const TEL_LINK = process.env.NEXT_PUBLIC_PHONE_TEL ?? "tel:+34600000000";
+const MAPS_URL =
+  process.env.NEXT_PUBLIC_MAPS_URL ??
+  "https://maps.google.com/?q=Cosas%20D%20Casa";
+
+export default async function ProductDetailPage({ params }: Props) {
+  const { id } = params;
+
+  const { data: product, error } = await supabase
+    .from("products")
+    .select("id, name, price_cents, image, description, category:categories(name)")
+    .eq("id", id)
+    .single<ProductDetail>();
+
+  if (error || !product) {
+    notFound();
+  }
+
+  const price = formatPrice(product.price_cents);
+
+  // ---- JSON-LD Product (para Google) ----
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tu-dominio.com";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description ?? "",
+    image: product.image ? [product.image] : [],
+    category: product.category?.name ?? "",
+    url: `${baseUrl}/catalogo/${product.id}`,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "EUR",
+      price: (product.price_cents / 100).toFixed(2),
+      availability: "https://schema.org/InStock",
+      url: `${baseUrl}/catalogo/${product.id}`,
+    },
+  };
+
+  // Mensaje WA prellenado
+  const waText = encodeURIComponent(
+    `Hola, me interesa el producto "${product.name}" (${price}). ¿Podemos hablar?`
+  );
+  const waLink = `https://wa.me/${WA_NUMBER}?text=${waText}`;
 
   return (
     <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <Image
-          src={product.image}
-          alt={product.name}
-          width={600}
-          height={400}
-          className="w-full h-64 object-cover"
-        />
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            width={800}
+            height={600}
+            sizes="(min-width: 1024px) 800px, 100vw"
+            className="w-full h-96 object-cover"
+            priority
+          />
+        ) : (
+          <div className="w-full h-96 bg-gray-200 flex items-center justify-center text-gray-500">
+            Sin imagen
+          </div>
+        )}
+
         <div className="p-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            {product.name}
-          </h1>
-          <p className="text-green-600 font-bold text-xl mb-2">
-            {product.price}
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">{product.name}</h1>
+          <p className="text-green-600 font-bold text-xl mb-4">{price}</p>
+
+          <p className="text-sm text-gray-500 mb-6">
+            {product.category?.name ?? "Sin categoría"}
           </p>
-          <p className="text-sm text-gray-500 mb-4">{product.category}</p>
-          <p className="text-gray-700 mb-6">{product.description}</p>
-          <Button
-            variant="whatsapp"
-            href={`https://wa.me/34XXXXXXXXX?text=Hola!%20Estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(
-              product.name
-            )}`}
+
+          <p className="text-gray-700 leading-relaxed mb-6">
+            {product.description || "Sin descripción disponible."}
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-wrap gap-3 mb-8">
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              WhatsApp
+            </a>
+            <a
+              href={TEL_LINK}
+              className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Llamar
+            </a>
+            <a
+              href={MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition"
+            >
+              Cómo llegar
+            </a>
+          </div>
+
+          <Link
+            href="/catalogo"
+            className="inline-block px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition"
           >
-            Comprar por WhatsApp
-          </Button>
+            ← Volver al catálogo
+          </Link>
         </div>
       </div>
     </main>
