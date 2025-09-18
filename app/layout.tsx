@@ -1,6 +1,7 @@
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { Providers } from "./providers";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     description: "Catálogo local de productos únicos para tu hogar",
     images: [
       {
-        url: "/og-image.jpg", // 📌 prepara esta imagen en /public
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Cosas D Casa",
@@ -45,21 +46,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body
-        className={`${inter.className} flex min-h-screen flex-col bg-gray-50 text-gray-800`}
+        className={`${inter.className} flex min-h-screen flex-col bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100`}
       >
-        <header>
-          <Navbar />
-        </header>
-        <main className="flex-grow">{children}</main>
-        <Footer />
+        <Providers>
+          <header>
+            <Navbar />
+          </header>
+          <main className="flex-grow">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

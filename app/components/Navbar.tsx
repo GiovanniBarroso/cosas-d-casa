@@ -1,136 +1,110 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X, MessageCircle, Instagram, Music } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
+
+const links = [
+  { href: "/", label: "Inicio" },
+  { href: "/catalogo", label: "Catálogo" },
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
-  const toggleMenu = () => setOpen((prev) => !prev);
+  // Cerrar el menú al cambiar de ruta
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Cerrar con tecla Esc
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md">
+    <nav
+      role="navigation"
+      aria-label="Principal"
+      className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/80"
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
-          className="text-lg font-bold text-gray-800 hover:text-blue-600 sm:text-xl"
+          className="text-lg font-extrabold text-gray-800 hover:text-blue-600 sm:text-xl dark:text-gray-100"
         >
-          Cosas D Casa 🏡
+          Cosas D Casa <span aria-hidden>🏡</span>
         </Link>
 
         {/* Links desktop */}
         <div className="hidden items-center gap-6 sm:flex">
-          <Link href="/" className="hover:text-blue-600 transition-colors">
-            Inicio
-          </Link>
-          <Link
-            href="/catalogo"
-            className="hover:text-blue-600 transition-colors"
-          >
-            Catálogo
-          </Link>
+          {links.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={pathname === href ? "page" : undefined}
+              className={`transition-colors hover:text-blue-600 ${pathname === href
+                ? "text-blue-600 font-semibold"
+                : "text-gray-700 dark:text-gray-300"
+                }`}
+            >
+              {label}
+            </Link>
+          ))}
 
-          {/* Redes sociales (desktop) */}
-          <div className="ml-4 flex items-center gap-3 text-gray-500">
-            <a
-              href="https://wa.me/34XXXXXXXXX"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="hover:text-green-600 transition-colors"
-            >
-              <MessageCircle size={20} />
-            </a>
-            <a
-              href="https://www.tiktok.com/@usuario"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="TikTok"
-              className="hover:text-black transition-colors"
-            >
-              <Music size={20} />
-            </a>
-            <a
-              href="https://www.instagram.com/usuario"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="hover:text-pink-600 transition-colors"
-            >
-              <Instagram size={20} />
-            </a>
-          </div>
+          {/* Toggle de tema en desktop */}
+          <ThemeToggle />
         </div>
 
-        {/* Botón móvil */}
-        <button
-          onClick={toggleMenu}
-          aria-label="Abrir menú"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          className="sm:hidden rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Botón menú móvil + Toggle de tema móvil */}
+        <div className="flex items-center gap-2 sm:hidden">
+          {/* Toggle de tema SIEMPRE visible en móvil */}
+          <ThemeToggle />
+
+          <button
+            onClick={() => setOpen((prev) => !prev)}
+            aria-label="Abrir menú"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            className="rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
-      {/* Menu móvil */}
-      {open && (
-        <div
-          id="mobile-menu"
-          className="sm:hidden border-t border-gray-200 bg-white px-4 py-4"
-        >
-          <div className="flex flex-col gap-3">
+      {/* Menú móvil */}
+      <div
+        id="mobile-menu"
+        className={`sm:hidden origin-top transform border-t border-gray-200 bg-white px-4 transition-all duration-200 dark:border-gray-700 dark:bg-gray-900 ${open
+          ? "scale-y-100 opacity-100 py-4"
+          : "scale-y-0 opacity-0 h-0 overflow-hidden"
+          }`}
+      >
+        <div className="flex flex-col gap-3">
+          {links.map(({ href, label }) => (
             <Link
-              href="/"
-              onClick={() => setOpen(false)}
-              className="block rounded-md px-3 py-2 hover:bg-gray-50 hover:text-blue-600"
+              key={href}
+              href={href}
+              aria-current={pathname === href ? "page" : undefined}
+              className={`block rounded-md px-3 py-2 transition-colors ${pathname === href
+                ? "text-blue-600 font-semibold"
+                : "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                }`}
             >
-              Inicio
+              {label}
             </Link>
-            <Link
-              href="/catalogo"
-              onClick={() => setOpen(false)}
-              className="block rounded-md px-3 py-2 hover:bg-gray-50 hover:text-blue-600"
-            >
-              Catálogo
-            </Link>
-
-            {/* Redes sociales (mobile) */}
-            <div className="mt-4 flex gap-4 text-gray-500">
-              <a
-                href="https://wa.me/34XXXXXXXXX"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-                className="hover:text-green-600"
-              >
-                <MessageCircle size={20} />
-              </a>
-              <a
-                href="https://www.tiktok.com/@usuario"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="hover:text-black"
-              >
-                <Music size={20} />
-              </a>
-              <a
-                href="https://www.instagram.com/usuario"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="hover:text-pink-600"
-              >
-                <Instagram size={20} />
-              </a>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+      </div>
     </nav>
   );
 }

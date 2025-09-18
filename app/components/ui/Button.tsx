@@ -3,8 +3,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import {
-  type ButtonHTMLAttributes,
-  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes
 } from "react";
 
 type Variant = "primary" | "secondary" | "whatsapp" | "ghost";
