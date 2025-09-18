@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle, RotateCcw } from "lucide-react";
+import Link from "next/link";
 
 export default function Error({
     error,
@@ -33,12 +34,14 @@ export default function Error({
                             Reintentar
                         </button>
                     )}
-                    <a
+
+                    {/* ✅ Cambiado de <a> a <Link> */}
+                    <Link
                         href="/"
                         className="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 shadow-sm transition hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
                     >
                         Volver al inicio
-                    </a>
+                    </Link>
                 </div>
             </div>
         </main>
