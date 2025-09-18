@@ -26,21 +26,24 @@ export default function CatalogGrid({
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
         return products.filter((p) => {
-            const byCat = categoryId === "all" || p.category_id === categoryId;
+            const byCat =
+                categoryId === "all" || String(p.category_id) === String(categoryId);
             const byQuery = !q || p.name.toLowerCase().includes(q);
             return byCat && byQuery;
         });
     }, [products, categoryId, query]);
 
+
     const grouped = useMemo(() => {
         const map = new Map<string, Product[]>();
         for (const p of filtered) {
-            const key = p.category_id;
+            const key = String(p.category_id);
             if (!map.has(key)) map.set(key, []);
             map.get(key)!.push(p);
         }
         return map;
     }, [filtered]);
+
 
     return (
         <>
@@ -53,9 +56,10 @@ export default function CatalogGrid({
                 >
                     <option value="all">Todas las categorías</option>
                     {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
+                        <option key={c.id} value={String(c.id)}>
                             {c.name}
                         </option>
+
                     ))}
                 </select>
 
@@ -70,29 +74,31 @@ export default function CatalogGrid({
 
             {/* Grids por categoría */}
             <div className="max-w-6xl mx-auto">
-                {(categoryId === "all" ? categories : categories.filter((c) => c.id === categoryId))
-                    .map((cat) => {
-                        const prods = grouped.get(cat.id) ?? [];
-                        if (!prods.length) return null;
+                {(categoryId === "all"
+                    ? categories
+                    : categories.filter((c) => String(c.id) === String(categoryId))
+                ).map((cat) => {
+                    const prods = grouped.get(String(cat.id)) ?? [];
+                    if (!prods.length) return null;
 
-                        return (
-                            <section key={cat.id} className="mb-12">
-                                <h2 className="text-xl font-semibold text-gray-800 mb-4">{cat.name}</h2>
-                                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                                    {prods.map((p) => (
-                                        <Card
-                                            key={p.id}
-                                            id={p.id}
-                                            title={p.name}
-                                            price={formatPrice(p.price_cents)}
-                                            category={cat.name}
-                                            image={p.image ?? undefined}
-                                        />
-                                    ))}
-                                </div>
-                            </section>
-                        );
-                    })}
+                    return (
+                        <section key={cat.id} className="mb-12">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4">{cat.name}</h2>
+                            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                                {prods.map((p) => (
+                                    <Card
+                                        key={p.id}
+                                        id={p.id}
+                                        title={p.name}
+                                        price={formatPrice(p.price_cents)}
+                                        category={cat.name}
+                                        image={p.image ?? undefined}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    );
+                })}
             </div>
 
             {/* Vacío */}
